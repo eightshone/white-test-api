@@ -35,7 +35,8 @@ router.post("/users/login", async (req, res) => {
 
 router.get("/users/me", auth, async (req, res) => {
   // View logged in user profile
-  res.send(req.user);
+  const user = await User.findOne({ _id: req.id });
+  res.send(user);
 });
 
 module.exports = router;
