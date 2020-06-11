@@ -7,33 +7,29 @@ const auth = require("../middleware/auth");
 const userSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "'name' is required"],
     trim: true
   },
   email: {
     type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    validate: value => {
-      if (!validator.isEmail(value)) {
-        throw new Error({ error: "Invalid Email address" });
-      }
-    }
+    required: [true, "'email' is required"],
+    unique: [true, "this email already exists"],
+    lowercase: true
   },
   password: {
     type: String,
-    required: true,
-    minLength: 7
+    required: [true, "'password' is required"],
+    minLength: [8, "password must be at least 8 charaters"]
   },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true
-      }
-    }
-  ]
+  role: {
+    type: String,
+    required: [true, "'role' is required"],
+    enum: ["admin", "student", "supervisor"]
+  },
+  token: {
+    type: String,
+    required: true
+  }
 });
 
 userSchema.pre("save", async function(next) {
@@ -48,8 +44,11 @@ userSchema.pre("save", async function(next) {
 userSchema.methods.generateAuthToken = async function() {
   // Generate an auth token for the user
   const user = this;
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_KEY);
-  user.tokens = user.tokens.concat({ token });
+  const token = await jwt.sign(
+    { _id: user._id, role: user.role },
+    process.env.JWT_KEY
+  );
+  user.token = token;
   await user.save();
   return token;
 };
@@ -70,5 +69,3 @@ userSchema.statics.findByCredentials = async (email, password) => {
 const User = new mongoose.model("User", userSchema);
 
 module.exports = User;
-
-// module.exports = mongoose.model("User", userSchema);
