@@ -13,6 +13,7 @@ const auth = async (req, res, next) => {
       throw new Error();
     }
     req.id = data._id;
+    req.role = data.role;
     req.token = token;
     next();
   } catch (error) {
