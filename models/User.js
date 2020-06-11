@@ -13,8 +13,13 @@ const userSchema = mongoose.Schema({
   email: {
     type: String,
     required: [true, "'email' is required"],
-    unique: [true, "this email already exists"],
-    lowercase: true
+    unique: true,
+    lowercase: true,
+    validate: value => {
+      if (!validator.isEmail(value)) {
+        throw new Error({ error: "Invalid email address" });
+      }
+    }
   },
   password: {
     type: String,
@@ -27,8 +32,7 @@ const userSchema = mongoose.Schema({
     enum: ["admin", "student", "supervisor"]
   },
   token: {
-    type: String,
-    required: true
+    type: String
   }
 });
 
@@ -44,7 +48,7 @@ userSchema.pre("save", async function(next) {
 userSchema.methods.generateAuthToken = async function() {
   // Generate an auth token for the user
   const user = this;
-  const token = await jwt.sign(
+  const token = jwt.sign(
     { _id: user._id, role: user.role },
     process.env.JWT_KEY
   );
