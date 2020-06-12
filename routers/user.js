@@ -189,6 +189,32 @@ router.get("/students", auth, async (req, res) => {
   });
 });
 
+router.get("/users/delete/:id", auth, async (req, res) => {
+  // Checks role
+  if (!req.role || req.role !== "admin") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
+  // checks if self deleting
+  if (req.id === req.params.id) {
+    res.status(400).send({ error: "Bad request, you can delete yourslef" });
+    return;
+  }
+  // delete student
+  const user = await User.findOneAndDelete({ _id: req.params.id });
+  res.send({
+    message: "user deleted",
+    data: {
+      student: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    }
+  });
+});
+
 router.post("/users/me/logout", auth, async (req, res) => {
   // Log user out of the application
   try {
