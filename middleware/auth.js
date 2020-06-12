@@ -8,7 +8,6 @@ const auth = async (req, res, next) => {
   }
   try {
     const data = jwt.verify(token, process.env.JWT_KEY);
-    console.log(data);
     if (!data || !data._id) {
       throw new Error();
     }
