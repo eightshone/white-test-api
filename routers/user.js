@@ -9,6 +9,7 @@ router.post("/students/signup", async (req, res) => {
   // Check for a body
   if (!data || data === {}) {
     res.status(400).send({ error: "Bad request" });
+    return;
   }
   // Create a new student
   try {
@@ -36,9 +37,11 @@ router.post("/admins/signup", async (req, res) => {
   // Check for a body
   if (!data || data === {}) {
     res.status(400).send({ error: "Bad request" });
+    return;
   }
   // Create a new admin
   try {
+    const adminExists = User.find({ role: "admin" });
     // check for existing isEmail
     const emailExists = await User.findOne({ email: data.email });
     if (emailExists) {
@@ -57,13 +60,16 @@ router.post("/admins/signup", async (req, res) => {
 });
 
 router.post("/supervisors", auth, async (req, res) => {
+  // Checks role
   if (!req.role || req.role !== "admin") {
     res.status(403).send({ error: "Forbidden" });
+    return;
   }
   const data = req.body;
   // Check for a body
   if (!data || data === {}) {
     res.status(400).send({ error: "Bad request" });
+    return;
   }
   // Create a new supervisor
   try {
@@ -115,6 +121,7 @@ router.get("/users/me", auth, async (req, res) => {
   const user = await User.findOne({ _id: req.id });
   if (!user) {
     res.status(400).send({ error: "Bad request" });
+    return;
   }
   res.send({
     data: {
@@ -129,10 +136,15 @@ router.get("/users/me", auth, async (req, res) => {
 });
 
 router.get("/supervisors", auth, async (req, res) => {
+  // Checks role
+  if (!req.role || req.role !== "admin") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
   // List supervisors
   const users = await User.find({ role: "supervisor" });
   const supervisors = users.map(el => {
-    return { name: el.name, email: el.email, role: el.role };
+    return { id: el._id, name: el.name, email: el.email, role: el.role };
   });
   res.send({
     data: {
@@ -142,10 +154,15 @@ router.get("/supervisors", auth, async (req, res) => {
 });
 
 router.get("/admins", auth, async (req, res) => {
+  // Checks role
+  if (!req.role || req.role !== "admin") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
   // List admins
   const users = await User.find({ role: "admin" });
   const admins = users.map(el => {
-    return { name: el.name, email: el.email, role: el.role };
+    return { id: el._id, name: el.name, email: el.email, role: el.role };
   });
   res.send({
     data: {
@@ -155,10 +172,15 @@ router.get("/admins", auth, async (req, res) => {
 });
 
 router.get("/students", auth, async (req, res) => {
+  // Checks role
+  if (!req.role || req.role !== "admin") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
   // List students
   const users = await User.find({ role: "student" });
   const students = users.map(el => {
-    return { name: el.name, email: el.email, role: el.role };
+    return { id: el._id, name: el.name, email: el.email, role: el.role };
   });
   res.send({
     data: {
@@ -173,6 +195,7 @@ router.post("/users/me/logout", auth, async (req, res) => {
     const user = await User.findOne({ _id: req.id });
     if (!user) {
       res.status(400).send({ error: "Bad request" });
+      return;
     }
     user.token = "";
     await user.save();
