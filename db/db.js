@@ -8,7 +8,7 @@ module.exports = async function connectionToMongo() {
       useUnifiedTopology: true,
       useFindAndModify: true
     });
-    console.log("Connecting to database established \u2713");
+    console.log("Connection to database established \u2713");
   } catch (err) {
     console.log("error:", err);
   }
