@@ -7,9 +7,26 @@ const whiteTestSchema = mongoose.Schema({
     required: [true, "'name' is required"],
     trim: true
   },
-  date: {
+  start_date: {
     type: String, // format: YYYY-MM-DD HH:mm
-    required: [true, "'date' is required"],
+    required: [true, "'start_date' is required"],
+    validate: value => {
+      if (moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
+        throw new Error({
+          error: "date format isn't valid, use: YYYY-MM-DD HH:mm"
+        });
+        return false;
+      }
+      if (moment(value, "YYYY-MM-DD: HH:mm").isBefore(moment())) {
+        throw new Error({ error: "date is in the past" });
+        return false;
+      }
+      return true;
+    }
+  },
+  end_date: {
+    type: String, // format: YYYY-MM-DD HH:mm
+    required: [true, "'end_date' is required"],
     validate: value => {
       if (moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
         throw new Error({
