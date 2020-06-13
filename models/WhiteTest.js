@@ -11,10 +11,13 @@ const whiteTestSchema = mongoose.Schema({
     type: String, // format: YYYY-MM-DD HH:mm
     required: [true, "'date' is required"],
     validate: value => {
-      if (
-        moment(value, "YYYY-MM-DD", true).isValid() &&
-        moment(value, "YYYY-MM-DD").isBefore(moment())
-      ) {
+      if (moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
+        throw new Error({
+          error: "date format isn't valid, use: YYYY-MM-DD HH:mm"
+        });
+        return false;
+      }
+      if (moment(value, "YYYY-MM-DD: HH:mm").isBefore(moment())) {
         throw new Error({ error: "date is in the past" });
         return false;
       }
