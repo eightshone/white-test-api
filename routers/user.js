@@ -231,4 +231,62 @@ router.post("/users/me/logout", auth, async (req, res) => {
   }
 });
 
+// edit a user
+router.post("/users/:id", auth, async (req, res) => {
+  // check if something was changed
+  let changed = false;
+  // Checks role
+  if (!req.role || req.role !== "admin") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
+  const data = req.body;
+  // Check for a body
+  if (!data || data === {}) {
+    res.status(400).send({ error: "Bad request" });
+    return;
+  }
+  // update user
+  try {
+    // check for user
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user) {
+      res.status(400).send({ error: "User doesn't exist" });
+      return;
+    }
+
+    // updates email if passed
+    if (data.email && data.email !== user.email) {
+      // check if the email exists
+      const emailExists = await User.findOne({ email: data.email });
+      if (emailExists) {
+        res.status(400).send({ error: "This email exists" });
+        return;
+      }
+      user.email = data.email;
+      changed = true;
+    }
+
+    // updates name if passed
+    if (data.name && data.name !== user.name) {
+      user.name = data.name;
+      changed = true;
+    }
+    if (changed) {
+      await user.save();
+      res.status(200).send({
+        message: "user updated",
+        data: { user: { name: user.name, email: user.email } }
+      });
+    } else {
+      res.status(200).send({
+        message: "nothing changed",
+        data: { user: { name: user.name, email: user.email } }
+      });
+    }
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
 module.exports = router;
