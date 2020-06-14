@@ -12,6 +12,7 @@ router.get("/whitetests", auth, async (req, res) => {
     // list all white tests
     const whiteTests = await WhiteTest.find()
       .populate("classroom", "name")
+      .populate("participants", "name")
       .populate("supervisor", "name");
     res.status(200).send({ data: { whiteTests } });
   } catch (error) {
@@ -144,6 +145,25 @@ router.post("/whitetests", auth, async (req, res) => {
     const whiteTest = new WhiteTest({ ...data, participants: [] });
     await whiteTest.save();
     res.status(200).send({ data: { whiteTest } });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
+// join white test
+router.get("/whitetests/:id", auth, async (req, res) => {
+  // check for admin role
+  if (!req.role || req.role !== "student") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
+
+  try {
+    // get test
+    const whiteTest = await WhiteTest.findOne({ _id: req.params.id });
+    whiteTest.participants.push(req.id);
+    whiteTest.save();
+    res.status(200).send({ message: "you are registered to this test" });
   } catch (error) {
     res.status(400).send(error);
   }
