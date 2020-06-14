@@ -169,4 +169,21 @@ router.get("/whitetests/:id", auth, async (req, res) => {
   }
 });
 
+// delete white test
+router.get("/whitetests/:id/delete", auth, async (req, res) => {
+  // check for admin role
+  if (!req.role || req.role !== "admin") {
+    res.status(403).send({ error: "Forbidden" });
+    return;
+  }
+
+  try {
+    // get test
+    const whiteTest = await WhiteTest.findOneAndDelete({ _id: req.params.id });
+    res.status(200).send({ message: "white test deleted", data: whiteTest });
+  } catch (error) {
+    res.status(400).send(error);
+  }
+});
+
 module.exports = router;
