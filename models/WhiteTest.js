@@ -11,13 +11,14 @@ const whiteTestSchema = mongoose.Schema({
     type: String, // format: YYYY-MM-DD HH:mm
     required: [true, "'start_date' is required"],
     validate: value => {
-      if (moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
+      if (!moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
         throw new Error({
           error: "date format isn't valid, use: YYYY-MM-DD HH:mm"
         });
         return false;
       }
       if (moment(value, "YYYY-MM-DD: HH:mm").isBefore(moment())) {
+        console.log("hani lenna");
         throw new Error({ error: "date is in the past" });
         return false;
       }
@@ -28,7 +29,7 @@ const whiteTestSchema = mongoose.Schema({
     type: String, // format: YYYY-MM-DD HH:mm
     required: [true, "'end_date' is required"],
     validate: value => {
-      if (moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
+      if (!moment(value, "YYYY-MM-DD HH:mm", true).isValid()) {
         throw new Error({
           error: "date format isn't valid, use: YYYY-MM-DD HH:mm"
         });
@@ -45,7 +46,19 @@ const whiteTestSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Classroom",
     required: [true, "'date' is required"]
-  }
+  },
+  supervisor: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: [true, "'supervisor' is required"]
+  },
+  participants: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false
+    }
+  ]
 });
 
 const WhiteTest = new mongoose.model("WhiteTest", whiteTestSchema);
