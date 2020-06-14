@@ -151,7 +151,7 @@ router.post("/whitetests", auth, async (req, res) => {
 });
 
 // join white test
-router.get("/whitetests/:id", auth, async (req, res) => {
+router.get("/whitetests/:id/join", auth, async (req, res) => {
   // check for admin role
   if (!req.role || req.role !== "student") {
     res.status(403).send({ error: "Forbidden" });
@@ -161,8 +161,15 @@ router.get("/whitetests/:id", auth, async (req, res) => {
   try {
     // get test
     const whiteTest = await WhiteTest.findOne({ _id: req.params.id });
+    const joined = whiteTest.participants.find(
+      el => `${el._id}` === `${req.id}`
+    );
+    if (joined) {
+      res.status(400).send({ message: "you have already joined" });
+      return;
+    }
     whiteTest.participants.push(req.id);
-    whiteTest.save();
+    await whiteTest.save();
     res.status(200).send({ message: "you are registered to this test" });
   } catch (error) {
     res.status(400).send(error);
