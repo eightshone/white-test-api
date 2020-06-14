@@ -18,7 +18,6 @@ const whiteTestSchema = mongoose.Schema({
         return false;
       }
       if (moment(value, "YYYY-MM-DD: HH:mm").isBefore(moment())) {
-        console.log("hani lenna");
         throw new Error({ error: "date is in the past" });
         return false;
       }

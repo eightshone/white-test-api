@@ -124,7 +124,6 @@ router.post("/whitetests", auth, async (req, res) => {
         // default
         return false;
       });
-      console.log(testAtThatDuration);
       if (testAtThatDuration.length !== 0) {
         res.status(400).send({ error: "room occupied" });
         return;
@@ -190,7 +189,6 @@ router.get("/whitetests/:id/unjoin", auth, async (req, res) => {
     whiteTest.participants = whiteTest.participants.filter(
       el => `${el._id}` !== `${req.id}`
     );
-    console.log(whiteTest.participants.filter(el => el._id !== req.id));
     await whiteTest.save();
     res.status(200).send({ message: "you unjoined this test" });
   } catch (error) {
